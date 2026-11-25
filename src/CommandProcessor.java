@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.List;
 
 public class CommandProcessor {
 //    private Scheduler sched;
@@ -55,7 +54,7 @@ public class CommandProcessor {
             return "Trace off";
         }
         else {
-            throw new IllegalArgumentException("Usage: TRACE ON|OFF");
+            return "ERROR: Usage: TRACE ON|OFF";
         }
     }
 
