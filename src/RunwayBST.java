@@ -332,10 +332,10 @@ public class RunwayBST {
         if (node.flight.start >= start)
             rangeSearch(node.left, start, end, result);
 
-        if (node.flight.start >= start && node.flight.start <= end)
+        if (node.flight.start >= start && node.flight.start < end)
             result.add(node.flight);
 
-        if (node.flight.start <= end)
+        if (node.flight.start < end)
             rangeSearch(node.right, start, end, result);
     }
 
