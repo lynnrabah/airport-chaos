@@ -248,11 +248,11 @@ public class Scheduler {
             totalC += cancelled[i];
         }
         sb.append(String.format("--- Totals: flights=%d SCHEDULED=%d DELAYED=%d CANCELLED=%d%n",
-                registry.size(), totalS, totalD, totalC));
+                registry.size, totalS, totalD, totalC));
         sb.append(String.format(Locale.ROOT,
                 "--- Registry: loadFactor=%.3f totalProbes=%d collisions=%d lastProbes=%d",
-                registry.loadFactor(), registry.getTotalProbes(), registry.getCollisions(),
-                registry.getLastProbes()));
+                registry.loadFactor(), registry.totalProbes, registry.collisions,
+                registry.lastProbes));
         return sb.toString();
     }
 }
