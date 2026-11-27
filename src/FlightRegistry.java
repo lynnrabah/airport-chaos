@@ -7,9 +7,9 @@ public class FlightRegistry {
 
     public byte[] state; // 3 possible values
 
-    private static final byte EMPTY = 0;
-    private static final byte OCCUPIED = 1;
-    private static final byte DELETED = 2;
+    public static final byte EMPTY = 0;
+    public static final byte OCCUPIED = 1;
+    public static final byte DELETED = 2;
 
     public int m; // hash table size
     public int size;
@@ -82,24 +82,6 @@ public class FlightRegistry {
         }
 
         return result;
-    }
-
-    // Return number of occupied slots
-    public int size() {
-        return this.size;
-    }
-
-    // Getters for statistics
-    public long getTotalProbes() {
-        return this.totalProbes;
-    }
-
-    public long getCollisions() {
-        return this.collisions;
-    }
-
-    public long getLastProbes() {
-        return this.lastProbes;
     }
 
     public int findIndex(String ID) {
