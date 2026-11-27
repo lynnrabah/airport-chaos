@@ -2,7 +2,7 @@ import java.util.ArrayList;
 
 public class DisruptionAnalyzer {
 	
-	private static class Result{
+	static class Result{
 		int left;
 		int right;
 		long sum;
