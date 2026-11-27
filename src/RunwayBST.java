@@ -1,4 +1,7 @@
-public class RunwaySchedulerBST {
+
+import java.util.ArrayList;
+
+public class RunwayBST {
 
     // Node class
     private static class Node {
@@ -22,6 +25,7 @@ public class RunwaySchedulerBST {
     }
 
     private Node root;
+    private boolean trace;
 
     // getRoot
     public Node getRoot() {
@@ -29,15 +33,15 @@ public class RunwaySchedulerBST {
     }
 
     // constructors
-    public RunwaySchedulerBST(Node root) {
+    public RunwayBST(Node root) {
         this.root = root;
     }
 
-    public RunwaySchedulerBST(Flight flight) {
+    public RunwayBST(Flight flight) {
         this(new Node(flight));
     }
 
-    public RunwaySchedulerBST() {
+    public RunwayBST() {
         root = null;
     }
 
@@ -49,6 +53,16 @@ public class RunwaySchedulerBST {
             return result;
 
         return a.flightId.compareTo(b.flightId);
+    }
+
+    // Compare a key with a flight
+    private int compare(long start, String flightId, Flight flight) {
+        int result = Long.compare(start, flight.start);
+
+        if (result != 0)
+            return result;
+
+        return flightId.compareTo(flight.flightId);
     }
 
     // searching for a flight
@@ -102,10 +116,11 @@ public class RunwaySchedulerBST {
     public void insert(Flight flight) {
 
         Node newNode = new Node(flight);
-        if(checkConflict(flight))
+
+        if (findConflicts(flight))
             throw new IllegalArgumentException("flight conflicts with another one");
+
         insertNode(newNode);
-        
     }
 
     // deleting a flight
@@ -143,8 +158,74 @@ public class RunwaySchedulerBST {
         return root;
     }
 
-    public void delete(Flight flight) {
+    public boolean delete(Flight flight) {
+
+        if (search(flight) == null)
+            return false;
+
         root = delete(root, flight);
+
+        return true;
+    }
+
+    // Delete using start time and flight ID
+    private Node deleteNode(Node node, long start, String flightId) {
+
+        if (node == null)
+            return null;
+
+        int result = compare(start, flightId, node.flight);
+
+        if (result > 0)
+            node.right = deleteNode(node.right, start, flightId);
+
+        else if (result < 0)
+            node.left = deleteNode(node.left, start, flightId);
+
+        else {
+            // no children
+            if (node.left == null && node.right == null)
+                return null;
+
+            // one child
+            if (node.left == null)
+                return node.right;
+
+            if (node.right == null)
+                return node.left;
+
+            // two children
+            Node successor = successorNode(node);
+            node.flight = successor.flight;
+            node.right = deleteNode(node.right,
+                    successor.flight.start,
+                    successor.flight.flightId);
+        }
+
+        return node;
+    }
+
+    public boolean delete(long start, String flightId) {
+
+        Node current = root;
+
+        while (current != null) {
+
+            int result = compare(start, flightId, current.flight);
+
+            if (result > 0)
+                current = current.right;
+
+            else if (result < 0)
+                current = current.left;
+
+            else {
+                root = deleteNode(root, start, flightId);
+                return true;
+            }
+        }
+
+        return false;
     }
 
     // find successor
@@ -220,59 +301,122 @@ public class RunwaySchedulerBST {
     }
 
     // inorder listing
-    private void inorder(Node node) {
+    private void inorder(Node node, ArrayList<Flight> result) {
+
         if (node == null)
             return;
 
-        inorder(node.left);
-        System.out.println(node.flight);
-        inorder(node.right);
+        inorder(node.left, result);
+
+        result.add(node.flight);
+
+        inorder(node.right, result);
     }
 
-    public void inorderListing() {
-        inorder(root);
+    public ArrayList<Flight> inorder() {
+
+        ArrayList<Flight> result = new ArrayList<>();
+
+        inorder(root, result);
+
+        return result;
     }
 
-    // time-range search
-    private void rangeSearch(Node node, long start, long end) {
+    // Time-range search
+    private void rangeSearch(Node node, long start, long end,
+            ArrayList<Flight> result) {
 
         if (node == null)
             return;
 
         if (node.flight.start >= start)
-            rangeSearch(node.left, start, end);
+            rangeSearch(node.left, start, end, result);
 
-        // Check current flight
         if (node.flight.start >= start && node.flight.start <= end)
-            System.out.println(node.flight);
+            result.add(node.flight);
 
         if (node.flight.start <= end)
-            rangeSearch(node.right, start, end);
+            rangeSearch(node.right, start, end, result);
     }
 
-    public void rangeSearch(long start, long end) {
+    public ArrayList<Flight> rangeSearch(long start, long end) {
 
         if (start > end)
             throw new IllegalArgumentException("Invalid time range");
 
-        rangeSearch(root, start, end);
+        ArrayList<Flight> result = new ArrayList<>();
+
+        rangeSearch(root, start, end, result);
+
+        return result;
     }
 
-    //check flight conflict time
-    public boolean checkConflict(Flight flight) {
+    // Find all flights overlapping a given interval
+    private void findConflicts(Node node, long start, long end,
+            ArrayList<Flight> result) {
 
-        Node predecessor = predecessor(flight);
-        Node successor = successor(flight);
+        if (node == null)
+            return;
 
-        if (predecessor != null &&
-                predecessor.flight.end > flight.start)
-            return true;
+        // Left subtree might contain flights that extend into the interval
+        findConflicts(node.left, start, end, result);
 
-        if (successor != null &&
-                successor.flight.start < flight.end)
-            return true;
+        // Check current flight
+        if (node.flight.start < end && node.flight.end > start)
+            result.add(node.flight);
 
-        return false;
+        // Right subtree can be skipped if current start >= end
+        if (node.flight.start < end)
+            findConflicts(node.right, start, end, result);
+    }
+
+    public ArrayList<Flight> findConflicts(long start, long end) {
+
+        if (start >= end)
+            throw new IllegalArgumentException("Invalid time interval");
+
+        ArrayList<Flight> result = new ArrayList<>();
+
+        findConflicts(root, start, end, result);
+
+        return result;
+    }
+
+    // Check whether a flight conflicts with existing flights
+    public boolean findConflicts(Flight flight) {
+
+        return !findConflicts(flight.start, flight.end).isEmpty();
+    }
+
+    // Count nodes
+    private int size(Node node) {
+
+        if (node == null)
+            return 0;
+
+        return 1 + size(node.left) + size(node.right);
+    }
+
+    public int size() {
+        return size(root);
+    }
+
+    // Calculate height
+    private int height(Node node) {
+
+        if (node == null)
+            return 0;
+
+        return 1 + Math.max(height(node.left), height(node.right));
+    }
+
+    public int height() {
+        return height(root);
+    }
+
+    // Enable or disable tracing
+    public void setTrace(boolean on) {
+        trace = on;
     }
 
 }
