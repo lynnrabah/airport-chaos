@@ -1,28 +1,34 @@
 import java.util.ArrayList;
 
 public class Tokenizer {
-	public static ArrayList<String> tokenize(String line){
-		boolean flag=false;
-		StringBuilder s=new StringBuilder();
+	public static ArrayList<String> tokenize(String line) {
 		ArrayList<String> words=new ArrayList<String>();
+		StringBuilder s=new StringBuilder();
+		boolean inQuotes=false;
+
 		for (int i=0;i<line.length();i++) {
-			if ((line.charAt(i)=='"')){
-				flag=!flag;
+			char c=line.charAt(i);
+
+			if (c=='"') {
+				inQuotes=!inQuotes;            //flip the switch, don't keep the quote
 			}
-			s.append(line.charAt(i));
-			if (line.charAt(i)==' ' && !flag) {
-				if (s.length()>0) {
-                    words.add(s.toString());
-                    s.setLength(0);
-                }
+			else if (c==' ' && !inQuotes) {
+				if (s.length()>0) {            //finish the word, only if it's not empty
+					words.add(s.toString());
+					s.setLength(0);
+				}
 			}
 			else {
-				s.append(line.charAt(i));
+				s.append(c);                   //part of the current word
 			}
 		}
-		if (s.length()>0) {
-            words.add(s.toString());
-        }
+
+		if (inQuotes) {
+			throw new IllegalArgumentException("Missing closing quote in: "+line);
+		}
+		if (s.length()>0) {                    //last word, which never met a space
+			words.add(s.toString());
+		}
 		return words;
 	}
 }
