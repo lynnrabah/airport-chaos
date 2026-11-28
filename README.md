@@ -4,7 +4,6 @@ CSC310 Algorithms and Data Structures, CP3 final project (Dr. Mohamed Watfa)
 
 **Team:** Lynn Rabah (202502872), Hasan Shour (202508340)
 **Language:** Java (no external libraries)
-**Interview version:** tag `interview-2026-11-28`
 
 A command-line simulator that loads a synthetic flight file, keeps each runway's schedule conflict-free, handles crises (runway closure, emergency insert, mass cancellation), and reports the operational impact. This is an educational simulation, not real aviation software.
 
